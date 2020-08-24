@@ -33,7 +33,7 @@ namespace SIDFLibrary
 
         private bool CheckExtension(string file)
         {
-            return extensions.Contains(Path.GetExtension(file));
+            return extensions.Contains(Path.GetExtension(file.ToLower()));
         }
 
         public void SetPath(string path)
@@ -120,6 +120,8 @@ namespace SIDFLibrary
             Hashes.Clear();
             Result.Clear();
             Files.Clear();
+
+            used.Clear();
         }
     }
 }

@@ -16,7 +16,7 @@ namespace CLI
 
             if (args.Length >= 1)
             {
-                path = args[1];
+                path = args[0];
             }
             else
             {
@@ -62,7 +62,7 @@ namespace CLI
                 Console.WriteLine();
             }
 
-            Console.ReadLine();
+            if (args.Length == 0) Console.ReadLine();
         }
 
         public static void ProgressBar(int i, int n)

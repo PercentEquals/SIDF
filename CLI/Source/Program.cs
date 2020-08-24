@@ -63,6 +63,8 @@ namespace CLI
             }
 
             if (args.Length == 0) Console.ReadLine();
+
+            comparer.Clear();
         }
 
         public static void ProgressBar(int i, int n)

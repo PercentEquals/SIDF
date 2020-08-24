@@ -17,10 +17,11 @@ namespace CLI
             string path = Console.ReadLine();
             Console.WriteLine();
 
-            comparer.Prepare(path);
-            var result = comparer.Compare();
+            comparer.SetPath(path);
+            comparer.Prepare();
+            comparer.Compare();
 
-            foreach (var item in result)
+            foreach (var item in comparer.Result)
             {
                 Console.WriteLine($"\"{ item.Key }\" is similar to:");
                 Console.ForegroundColor = ConsoleColor.Cyan;

@@ -16,6 +16,7 @@ using System.Windows.Shapes;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using SIDFLibrary;
 using System.Threading;
+using System.IO;
 
 namespace GUI
 {
@@ -148,8 +149,22 @@ namespace GUI
             var item = (sender as ListView).SelectedItem;
             if (item == null) return;
 
-            BitmapImage image = new BitmapImage(new Uri(((ImgBind)item).Name));
+            ImgBind file = (ImgBind)item;
+
+            BitmapImage image = new BitmapImage(new Uri(file.FullName));
             ImgPreview.Source = image;
+
+            FileInfo fi = new FileInfo(file.FullName);
+
+            List<DataBind> items = new List<DataBind>();
+            items.Add(new DataBind() { Property = "Name", Value = fi.Name });
+            items.Add(new DataBind() { Property = "Path", Value = fi.DirectoryName });
+            items.Add(new DataBind() { Property = "Size", Value = Utils.GetFileSize(fi.FullName) });
+            items.Add(new DataBind() { Property = "Dimensions", Value = $"{ image.Width }x{ image.Height }" });
+            DataPreview.ItemsSource = items;
+
+            System.GC.Collect();
+            System.GC.WaitForPendingFinalizers();
         }
 
         #endregion
@@ -208,11 +223,11 @@ namespace GUI
             {
                 group++;
 
-                items.Add(new ImgBind() { Name = orig.Key, Group = $"Group { group }", Size = orig.Key });
+                items.Add(new ImgBind() { Name = System.IO.Path.GetFileName(orig.Key), Group = $"Group { group }", Size = orig.Key, FullName = orig.Key });
 
                 foreach (var copy in orig.Value)
                 {
-                    items.Add(new ImgBind() { Name = copy, Group = $"Group { group }", Size = copy });
+                    items.Add(new ImgBind() { Name = System.IO.Path.GetFileName(copy), Group = $"Group { group }", Size = copy, FullName = copy });
                 }
             }
 

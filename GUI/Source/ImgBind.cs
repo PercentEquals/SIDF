@@ -14,6 +14,7 @@ namespace GUI
     {
         private string _size;
 
+        public string FullName { get; set; }
         public string Name { get; set; }
         public string Group { get; set; }
         public string Size 

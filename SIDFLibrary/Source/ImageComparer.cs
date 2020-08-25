@@ -12,30 +12,56 @@ namespace SIDFLibrary
 {
     public class ImageComparer
     {
-        private string[] extensions;
-        private List<string> used;
+        #region Fields and Properties
+
+        private string[] _extensions;
+        private List<string> _used;
 
         public Dictionary<string, List<bool>> Hashes { get; private set; } = new Dictionary<string, List<bool>>();
         public Dictionary<string, List<string>> Result { get; private set; } = new Dictionary<string, List<string>>();
         public List<string> Files { get; set; } = new List<string>();
 
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Default contructor
+        /// </summary>
         public ImageComparer() 
         {
-            extensions = new string[]
+            _extensions = new string[]
             {
                 ".bmp", ".exif", ".jpeg", ".jpg", ".png", ".tiff"
             };
 
-            used = new List<string>();
+            _used = new List<string>();
 
             Clear();
         }
 
+        #endregion
+
+        #region PrivateMethods
+
+        /// <summary>
+        /// Returns whether file has acceptable extenstion
+        /// </summary>
+        /// <param name="file">Full filepath with filename</param>
+        /// <returns></returns>
         private bool CheckExtension(string file)
         {
-            return extensions.Contains(Path.GetExtension(file.ToLower()));
+            return _extensions.Contains(Path.GetExtension(file.ToLower()));
         }
 
+        #endregion
+
+        #region PublicMethods
+
+        /// <summary>
+        /// Enumarates through all files within directory and its subfolders
+        /// </summary>
+        /// <param name="path">Path to directory</param>
         public void SetPath(string path)
         {
             if (path == "") return;
@@ -43,6 +69,9 @@ namespace SIDFLibrary
             Files = Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories).Where(file => CheckExtension(file)).ToList();
         }
 
+        /// <summary>
+        /// Executes 'IteratePreparation' method for every file
+        /// </summary>
         public void Prepare()
         {
             for(int i = 0; i < Files.Count(); i++)
@@ -51,6 +80,25 @@ namespace SIDFLibrary
             }
         }
 
+        /// <summary>
+        /// Executes 'IterateComparison' method for every file
+        /// </summary>
+        public void Compare()
+        {
+            foreach (var hash in Hashes)
+            {
+                IterateComparison(hash);
+            }
+        }
+
+        #endregion
+
+        #region IterateMethods
+
+        /// <summary>
+        /// Iterates through files and generates hashes
+        /// </summary>
+        /// <param name="i">Index of Files property</param>
         public void IteratePreparation(int i)
         {
             try
@@ -70,17 +118,13 @@ namespace SIDFLibrary
             }
         }
 
-        public void Compare()
-        {
-            foreach (var hash in Hashes)
-            {
-                IterateComparison(hash);
-            }
-        }
-
+        /// <summary>
+        /// Iterates through hashes and compares them with passed hash
+        /// </summary>
+        /// <param name="hash">Hash to campare with every other one</param>
         public void IterateComparison(in KeyValuePair<string, List<bool>> hash)
         {
-            if (used.Contains(hash.Key)) return;
+            if (_used.Contains(hash.Key)) return;
 
             foreach (var comp in Hashes)
             {
@@ -91,11 +135,20 @@ namespace SIDFLibrary
                     if (Result.ContainsKey(hash.Key)) Result[hash.Key].Add(comp.Key);
                     else Result.Add(hash.Key, new List<string>() { comp.Key });
 
-                    used.Add(comp.Key);
+                    _used.Add(comp.Key);
                 }
             }
         }
 
+        #endregion
+
+        #region GetHashMethod
+
+        /// <summary>
+        /// Creates hashes of images by scaling them to 20x20 and then reducing those pixels to black and white
+        /// </summary>
+        /// <param name="bitmap">Bitmap of image</param>
+        /// <returns>Hash of file in form of 20x20 List of booleans</returns>
         public static List<bool> GetHash(Bitmap bitmap)
         {
             List<bool> result = new List<bool>();
@@ -115,13 +168,22 @@ namespace SIDFLibrary
             return result;
         }
 
+        #endregion
+
+        #region ClearMethod
+
+        /// <summary>
+        /// Clears dictionaries and lists
+        /// </summary>
         public void Clear()
         {
             Hashes.Clear();
             Result.Clear();
             Files.Clear();
 
-            used.Clear();
+            _used.Clear();
         }
+
+        #endregion
     }
 }

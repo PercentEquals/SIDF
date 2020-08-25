@@ -24,16 +24,29 @@ namespace GUI
     /// </summary>
     public partial class MainWindow : Window
     {
+        #region Fields and Properties
+
         private ManualResetEvent _shutdownEvent = new ManualResetEvent(false);
 
         private ImageComparer Comparer { get; set; } = new ImageComparer();
         private Thread WorkerThread { get; set; }
+
+        #endregion
+
+        #region Initializer
 
         public MainWindow()
         {
             InitializeComponent();
         }
 
+        #endregion
+
+        #region ResetMethod
+
+        /// <summary>
+        /// Resets state of application to its initial form
+        /// </summary>
         private void ResetToDefault()
         {
             PrgBarBlock.Visibility = Visibility.Hidden;
@@ -51,6 +64,15 @@ namespace GUI
             ProgressLabel.Text = "";
         }
 
+        #endregion
+
+        #region Button Clicks
+
+        /// <summary>
+        /// Opens folder dialog on button click
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void DirButton_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new CommonOpenFileDialog();
@@ -70,6 +92,11 @@ namespace GUI
             }
         }
 
+        /// <summary>
+        /// Creates (or stops) worker thread that searches for duplicate images
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void CmpButton_Click(object sender, RoutedEventArgs e)
         {
             // If button was 'tranformed' to be cancel button, then cancel thread
@@ -116,6 +143,14 @@ namespace GUI
             WorkerThread.Start();
         }
 
+        #endregion
+
+        #region Worker Method
+
+        /// <summary>
+        /// Looks for duplicate images (prepares them and then compares).
+        /// This method was created with multithreading in mind.
+        /// </summary>
         private void LookForDuplicates()
         {
             // Action to change UI progressbar that is owned by other thread
@@ -148,6 +183,13 @@ namespace GUI
             }
         }
 
+        #endregion
+
+        #region Populate ListView
+
+        /// <summary>
+        /// Populate ListView with images and groups
+        /// </summary>
         private void PopulateImages()
         {
             List<ImgBind> items = new List<ImgBind>();
@@ -170,5 +212,7 @@ namespace GUI
             PropertyGroupDescription groupDescription = new PropertyGroupDescription("Group");
             view.GroupDescriptions.Add(groupDescription);
         }
+
+        #endregion
     }
 }

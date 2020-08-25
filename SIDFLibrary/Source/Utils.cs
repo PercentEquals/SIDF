@@ -9,6 +9,11 @@ namespace GUI
 {
     public static class Utils
     {
+        /// <summary>
+        /// Return size of file in humar readable format
+        /// </summary>
+        /// <param name="path">Path to file</param>
+        /// <returns>Human readable filesize</returns>
         public static string GetFileSize(string path)
         {
             string[] sizes = { "B", "KB", "MB", "GB" };

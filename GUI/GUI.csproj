@@ -7,7 +7,7 @@
     <ProjectGuid>{E3D2370E-300C-4088-AB92-010A76C9872D}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <RootNamespace>GUI</RootNamespace>
-    <AssemblyName>GUI</AssemblyName>
+    <AssemblyName>SIDF</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>

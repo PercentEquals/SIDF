@@ -7,13 +7,19 @@ using SIDFLibrary;
 
 namespace CLI
 {
+    /// <summary>
+    /// CLI for SIDF
+    /// </summary>
     class Program
     {
+        #region Main
+
         static void Main(string[] args)
         {
             ImageComparer comparer = new ImageComparer();
             string path;
 
+            // Check if program was run with argument
             if (args.Length >= 1)
             {
                 path = args[0];
@@ -27,6 +33,7 @@ namespace CLI
 
             comparer.SetPath(path);
 
+            // Prepare hashes of images
             Console.WriteLine("Preparing images: ");
 
             for (int i = 0; i < comparer.Files.Count(); i++)
@@ -36,6 +43,7 @@ namespace CLI
 
             }
 
+            // Compare hashes of images
             Console.WriteLine("\nComparing images: ");
 
             int index = 1;
@@ -48,6 +56,7 @@ namespace CLI
 
             Console.WriteLine("\n");
 
+            // Showcase images with duplicates
             foreach (var item in comparer.Result)
             {
                 Console.WriteLine($"File \"{ item.Key }\" is similar to:");
@@ -67,9 +76,20 @@ namespace CLI
             comparer.Clear();
         }
 
+        #endregion
+
+        #region ProgressBar
+
+        /// <summary>
+        /// Prints simple "progressbar" with item/item and percent representation
+        /// </summary>
+        /// <param name="i">Actual step of progress</param>
+        /// <param name="n">Number of all steps</param>
         public static void ProgressBar(int i, int n)
         {
             Console.Write($"\r{ i }/{ n } - ({ Convert.ToInt32(Convert.ToDecimal(i) / n * 100) }%)");
         }
+
+        #endregion
     }
 }

@@ -7,7 +7,7 @@
     <ProjectGuid>{9A676E81-27D1-4FF5-A785-0114B398CF73}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>CLI</RootNamespace>
-    <AssemblyName>CLI</AssemblyName>
+    <AssemblyName>SIDF-CLI</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

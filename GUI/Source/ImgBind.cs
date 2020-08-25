@@ -7,6 +7,9 @@ using System.Windows.Media.Media3D;
 
 namespace GUI
 {
+    /// <summary>
+    /// Class used for binders in ListView
+    /// </summary>
     class ImgBind
     {
         private string _size;

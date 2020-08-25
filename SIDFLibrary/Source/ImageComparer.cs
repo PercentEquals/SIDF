@@ -103,9 +103,7 @@ namespace SIDFLibrary
         {
             try
             {
-                Bitmap bitmap = (Bitmap)Bitmap.FromFile(Files[i]);
-
-                Hashes.Add(Files[i], GetHash(ref bitmap));
+                Hashes.Add(Files[i], GetHash(Files[i]));
             }
             catch (System.ArgumentException)
             {
@@ -113,7 +111,7 @@ namespace SIDFLibrary
             };
 
             // Garbage collector
-            if (i % 15 == 0)
+            if (i % 30 == 0)
             {
                 System.GC.Collect();
                 System.GC.WaitForPendingFinalizers();
@@ -132,7 +130,7 @@ namespace SIDFLibrary
             {
                 if (hash.Key == comp.Key) continue;
 
-                if (hash.Value.Zip(comp.Value, (i, j) => i == j).Count(eq => eq) >= 286)
+                if (hash.Value.Zip(comp.Value, (i, j) => i == j).Count(eq => eq) >= 253)
                 {
                     if (Result.ContainsKey(hash.Key)) Result[hash.Key].Add(comp.Key);
                     else Result.Add(hash.Key, new List<string>() { comp.Key });
@@ -169,26 +167,29 @@ namespace SIDFLibrary
         }
 
         /// <summary>
-        /// Creates hashes of images by scaling them to 17x17 and then reducing those pixels to black and white
+        /// Creates hashes of images by scaling them to 16x16 and then reducing those pixels to black and white
         /// </summary>
         /// <param name="bitmap">Bitmap of image</param>
-        /// <returns>Hash of file in form of 17x17 List of booleans</returns>
-        public static List<bool> GetHash(ref Bitmap bitmap)
+        /// <returns>Hash of file in form of 16x16 List of booleans</returns>
+        public static List<bool> GetHash(string path)
         {
             List<bool> result = new List<bool>();
 
-            bitmap = new Bitmap(bitmap, new Size(17, 17));
-            float brightness = GetMedianBrightness(bitmap);
-
-            for (int j = 0; j < bitmap.Height; j++)
+            using (Bitmap temp = new Bitmap(path))
             {
-                for (int i = 0; i < bitmap.Width; i++)
+                using (Bitmap bitmap = new Bitmap(temp, new Size(16, 16)))
                 {
-                    result.Add(bitmap.GetPixel(i, j).GetBrightness() < brightness);
+                    float brightness = GetMedianBrightness(bitmap);
+
+                    for (int j = 0; j < bitmap.Height; j++)
+                    {
+                        for (int i = 0; i < bitmap.Width; i++)
+                        {
+                            result.Add(bitmap.GetPixel(i, j).GetBrightness() < brightness);
+                        }
+                    }
                 }
             }
-
-            bitmap.Dispose();
 
             return result;
         }

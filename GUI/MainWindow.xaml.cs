@@ -17,6 +17,7 @@ using Microsoft.WindowsAPICodePack.Dialogs;
 using SIDFLibrary;
 using System.Threading;
 using System.IO;
+using System.Net.Cache;
 
 namespace GUI
 {
@@ -162,9 +163,6 @@ namespace GUI
             items.Add(new DataBind() { Property = "Size", Value = Utils.GetFileSize(fi.FullName) });
             items.Add(new DataBind() { Property = "Dimensions", Value = $"{ image.Width }x{ image.Height }" });
             DataPreview.ItemsSource = items;
-
-            System.GC.Collect();
-            System.GC.WaitForPendingFinalizers();
         }
 
         #endregion
@@ -178,32 +176,30 @@ namespace GUI
         private void LookForDuplicates()
         {
             // Action to change UI progressbar that is owned by other thread
-            Action<int> action = (i) => 
+            Action action = () => 
             {
-                Progress.Value = i;
+                Progress.Value++;
 
-                if (i <= Comparer.Files.Count())  ProgressLabel.Text = $"Preparing files: { i }/{ Comparer.Files.Count() }";
-                else ProgressLabel.Text = $"Comparing files: { i - Comparer.Files.Count() }/{ Comparer.Files.Count() }";
+                if (Progress.Value <= Comparer.Files.Count())  ProgressLabel.Text = $"Preparing files: { Progress.Value }/{ Comparer.Files.Count() }";
+                else ProgressLabel.Text = $"Comparing files: { Progress.Value - Comparer.Files.Count() }/{ Comparer.Files.Count() }";
             };
 
-            // First prepare image hashes
-            for (int i = 0; i < Comparer.Files.Count(); i++)
+            // Generate image hashes
+            Parallel.For(0, Comparer.Files.Count(), (i) =>
             {
                 if (_shutdownEvent.WaitOne(0)) return; // Check for cancelation
 
                 Comparer.IteratePreparation(i);
-                Dispatcher.BeginInvoke(action, i + 1);
-            }
+                Dispatcher.BeginInvoke(action);
+            });
 
             // Comapare image hashes
-            int index = Comparer.Files.Count() + 1;
             foreach (var hash in Comparer.Hashes)
             {
                 if (_shutdownEvent.WaitOne(0)) return; // Check for cancelation
 
                 Comparer.IterateComparison(hash);
-                Dispatcher.BeginInvoke(action, index);
-                index++;
+                Dispatcher.BeginInvoke(action);
             }
         }
 

@@ -24,21 +24,14 @@ namespace GUI
     /// </summary>
     public partial class MainWindow : Window
     {
+        private ManualResetEvent _shutdownEvent = new ManualResetEvent(false);
+
         private ImageComparer Comparer { get; set; } = new ImageComparer();
         private Thread WorkerThread { get; set; }
 
         public MainWindow()
         {
             InitializeComponent();
-
-            WorkerThread = new Thread(() =>
-            {
-                LookForDuplicates();
-                Dispatcher.BeginInvoke(new Action(PopulateImages));
-                Dispatcher.BeginInvoke(new Action(ResetToDefault));
-            });
-
-            WorkerThread.IsBackground = true;
         }
 
         private void ResetToDefault()
@@ -53,6 +46,9 @@ namespace GUI
 
             CmpButtonLabel.Text = "Start Searching";
             CmpButtonIcon.Icon = FontAwesome.WPF.FontAwesomeIcon.Search;
+
+            Progress.Value = 0;
+            ProgressLabel.Text = "";
         }
 
         private void DirButton_Click(object sender, RoutedEventArgs e)
@@ -76,17 +72,18 @@ namespace GUI
 
         private void CmpButton_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: SAFE MULTITHREADING
+            // If button was 'tranformed' to be cancel button, then cancel thread
             if (CmpButtonLabel.Text == "Cancel Search")
             {
-                WorkerThread.Abort();
+                _shutdownEvent.Set();
+                WorkerThread.Join();
+                _shutdownEvent.Reset();
+                
                 Comparer.Clear();
-                ResetToDefault();
                 return;
             }
 
             // Clear previous search
-            ImageView.Items.Clear();
             Comparer.Clear();
 
             // Set new path
@@ -107,6 +104,15 @@ namespace GUI
             CmpButtonIcon.Icon = FontAwesome.WPF.FontAwesomeIcon.Times;
 
             // Look for duplicates in new thread so UI can work indepedently
+            WorkerThread = new Thread(() =>
+            {
+                LookForDuplicates();
+                Dispatcher.BeginInvoke(new Action(PopulateImages));
+                Dispatcher.BeginInvoke(new Action(ResetToDefault));
+            });
+
+            WorkerThread.IsBackground = true;
+
             WorkerThread.Start();
         }
 
@@ -124,6 +130,8 @@ namespace GUI
             // First prepare image hashes
             for (int i = 0; i < Comparer.Files.Count(); i++)
             {
+                if (_shutdownEvent.WaitOne(0)) return; // Check for cancelation
+
                 Comparer.IteratePreparation(i);
                 Dispatcher.BeginInvoke(action, i + 1);
             }
@@ -132,6 +140,8 @@ namespace GUI
             int index = Comparer.Files.Count() + 1;
             foreach (var hash in Comparer.Hashes)
             {
+                if (_shutdownEvent.WaitOne(0)) return; // Check for cancelation
+
                 Comparer.IterateComparison(hash);
                 Dispatcher.BeginInvoke(action, index);
                 index++;
@@ -140,23 +150,32 @@ namespace GUI
 
         private void PopulateImages()
         {
-            var item = new TreeViewItem();
+            List<ImgBind> items = new List<ImgBind>();
+            int group = 0;
 
             foreach (var orig in Comparer.Result)
             {
-                item.Header = orig.Key;
+                group++;
+
+                items.Add(new ImgBind() { Name = orig.Key, GroupNumber = $"Group { group }" });
 
                 foreach (var copy in orig.Value)
                 {
-                    var subitem = new TreeViewItem();
-
-                    subitem.Header = copy;
-
-                    item.Items.Add(subitem);
+                    items.Add(new ImgBind() { Name = copy, GroupNumber = $"Group { group }" });
                 }
             }
 
-            ImageView.Items.Add(item);
+            ImageView.ItemsSource = items;
+            CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(ImageView.ItemsSource);
+            PropertyGroupDescription groupDescription = new PropertyGroupDescription("GroupNumber");
+            view.GroupDescriptions.Add(groupDescription);
         }
     }
+
+    class ImgBind
+    {
+        public string Name { get; set; }
+        public string GroupNumber { get; set; }
+    }
+
 }

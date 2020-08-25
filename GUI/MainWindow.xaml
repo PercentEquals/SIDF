@@ -67,12 +67,13 @@
             <ListView Name="ImageView" Grid.Column="0" BorderThickness="0" 
                       ScrollViewer.HorizontalScrollBarVisibility="Disabled" 
                       SelectionMode="Single" MinWidth="200"
-                      PreviewMouseLeftButtonUp="ImageView_Click">
+                      PreviewMouseLeftButtonUp="ImageView_Click"
+                      VirtualizingStackPanel.IsVirtualizing="True">
 
                 <!-- PANEL -->
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-
+                        
                         <WrapPanel Orientation="Horizontal" Margin="0"/>
 
                     </ItemsPanelTemplate>
@@ -92,14 +93,17 @@
                         </GroupStyle.HeaderTemplate>
                     </GroupStyle>
                 </ListView.GroupStyle>
-
+                
                 <!-- ITEM -->
                 <ListView.ItemTemplate>
                     <DataTemplate>
-
                         <Border BorderBrush="Black" BorderThickness="1" Margin="0,2.5">
                             <StackPanel Width="150" Background="Black">
-                                <Image Source="{Binding FullName}" Width="150" Height="150" />
+                                <Image Width="150" Height="150">
+                                    <Image.Source>
+                                        <BitmapImage DecodePixelWidth="150" UriSource="{Binding FullName}" />
+                                    </Image.Source>
+                                </Image>
                                 <StackPanel Background="#eee">
                                     <TextBlock Text="{Binding Name}" Margin="5,5,5,2" FontSize="11" TextTrimming="CharacterEllipsis" />
                                     <TextBlock Text="{Binding Size}" Margin="5,0,5,5" FontSize="11" />
@@ -109,6 +113,14 @@
 
                     </DataTemplate>
                 </ListView.ItemTemplate>
+
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListBoxItem}">
+                        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                        <Setter Property="VerticalContentAlignment" Value="Center"/>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+
             </ListView>
 
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="#eee" />

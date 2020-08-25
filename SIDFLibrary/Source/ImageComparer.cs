@@ -103,7 +103,9 @@ namespace SIDFLibrary
         {
             try
             {
-                Hashes.Add(Files[i], GetHash(new Bitmap(Files[i])));
+                Bitmap bitmap = (Bitmap)Bitmap.FromFile(Files[i]);
+
+                Hashes.Add(Files[i], GetHash(ref bitmap));
             }
             catch (System.ArgumentException)
             {
@@ -142,24 +144,42 @@ namespace SIDFLibrary
 
         #endregion
 
-        #region GetHashMethod
+        #region Hashing Methods
+
+        public static float GetMedianBrightness(in Bitmap bitmap)
+        {
+            List<float> brightness = new List<float>();
+
+            for (int j = 0; j < bitmap.Height; j++)
+            {
+                for (int i = 0; i < bitmap.Width; i++)
+                {
+                    brightness.Add(bitmap.GetPixel(i, j).GetBrightness());
+                }
+            }
+
+            brightness.Sort();
+
+            return brightness[brightness.Count / 2];
+        }
 
         /// <summary>
         /// Creates hashes of images by scaling them to 20x20 and then reducing those pixels to black and white
         /// </summary>
         /// <param name="bitmap">Bitmap of image</param>
         /// <returns>Hash of file in form of 20x20 List of booleans</returns>
-        public static List<bool> GetHash(Bitmap bitmap)
+        public static List<bool> GetHash(ref Bitmap bitmap)
         {
             List<bool> result = new List<bool>();
 
             bitmap = new Bitmap(bitmap, new Size(20, 20));
+            float brightness = GetMedianBrightness(bitmap);
 
             for (int j = 0; j < bitmap.Height; j++)
             {
                 for (int i = 0; i < bitmap.Width; i++)
                 {
-                    result.Add(bitmap.GetPixel(i, j).GetBrightness() < 0.5f);
+                    result.Add(bitmap.GetPixel(i, j).GetBrightness() < brightness);
                 }
             }
 

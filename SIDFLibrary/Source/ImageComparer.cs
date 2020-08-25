@@ -157,6 +157,7 @@ namespace SIDFLibrary
             {
                 for (int i = 0; i < bitmap.Width; i++)
                 {
+                    if (bitmap.GetPixel(i, j).A <= 0.1) continue; 
                     brightness.Add(bitmap.GetPixel(i, j).GetBrightness());
                 }
             }

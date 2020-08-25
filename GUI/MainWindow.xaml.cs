@@ -18,6 +18,7 @@ using SIDFLibrary;
 using System.Threading;
 using System.IO;
 using System.Net.Cache;
+using System.Diagnostics;
 
 namespace GUI
 {
@@ -145,6 +146,11 @@ namespace GUI
             WorkerThread.Start();
         }
 
+        /// <summary>
+        /// Shows image preview with usefull data
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ImageView_Click(object sender, RoutedEventArgs e)
         {
             var item = (sender as ListView).SelectedItem;
@@ -162,7 +168,18 @@ namespace GUI
             items.Add(new DataBind() { Property = "Path", Value = fi.DirectoryName });
             items.Add(new DataBind() { Property = "Size", Value = Utils.GetFileSize(fi.FullName) });
             items.Add(new DataBind() { Property = "Dimensions", Value = $"{ image.Width }x{ image.Height }" });
+            items.Add(new DataBind() { Property = "DPI", Value = $"{ image.DpiX }x{ image.DpiY }" });
             DataPreview.ItemsSource = items;
+        }
+
+        /// <summary>
+        /// Shows image in user's defualt program
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ImgPreview_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start((sender as Image).Source.ToString());
         }
 
         #endregion

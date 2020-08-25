@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:GUI"
         mc:Ignorable="d"
         Title="Simple Image Duplicate Finder" 
-        Height="600" Width="1200"
+        Height="600" Width="850"
         MinHeight="450" MinWidth="800">
     
     <DockPanel Margin="10px">
@@ -20,6 +20,7 @@
                 <ColumnDefinition Width="125px" />
             </Grid.ColumnDefinitions>
 
+            <!-- First column -->
             <Button Name="DirButton" Grid.Column="0" Cursor="Hand" Click="DirButton_Click">
                 <StackPanel Orientation="Horizontal">
                     <fa:FontAwesome Icon="Folder" Margin="0 3 5 0"/>
@@ -27,28 +28,28 @@
                 </StackPanel>
             </Button>
 
+            <!-- Second column -->
             <Label Name="DirLabel" Content="No folder selected." Grid.Column="1" BorderBrush="Black" BorderThickness="0,1" />
-            
+
+            <Grid Name="PrgBarBlock" Grid.Column="1" Visibility="Hidden">
+                <ProgressBar Name="Progress" Value="0" BorderBrush="Black" BorderThickness="0,1" />
+                <TextBlock Name="ProgressLabel" TextAlignment="Center" Margin="0,2,0,0" FontSize="12" Height="20" HorizontalAlignment="Center"></TextBlock>
+            </Grid>
+
+            <!-- Third column -->
             <Border Grid.Column="2" BorderBrush="Black" BorderThickness="1">
                 <Button Name="CmpButton" IsEnabled="False" Cursor="Hand" BorderThickness="0" Click="CmpButton_Click">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock>Start Searching</TextBlock>
-                        <fa:FontAwesome Icon="Search" Margin="5 3 0 0"/>
+                        <TextBlock Name="CmpButtonLabel">Start Searching</TextBlock>
+                        <fa:FontAwesome Name="CmpButtonIcon" Icon="Search" Margin="5 3 0 0"/>
                     </StackPanel>
                 </Button>
             </Border>
-            
+
 
         </Grid>
 
-        <Grid Margin="0 10 0 10" Height="23" DockPanel.Dock="Top">
-            <ProgressBar Name="Progress" Value="0" />
-            <TextBlock Name="ProgressLabel" TextAlignment="Center" Margin="0,2,0,0" FontSize="14"></TextBlock>
-        </Grid>
-
-        <TextBlock Name="ResultBox" Text="" />
-
-        <TreeView Name="ImageView" DockPanel.Dock="Top">
+        <TreeView Name="ImageView" DockPanel.Dock="Top" Margin="0,10,0,0" >
             <TreeView.Resources>
                 <Style TargetType="{x:Type TreeViewItem}">
                     <Setter Property="HeaderTemplate">

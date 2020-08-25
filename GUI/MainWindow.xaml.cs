@@ -24,11 +24,35 @@ namespace GUI
     /// </summary>
     public partial class MainWindow : Window
     {
-        private ImageComparer comparer { get; set; } = new ImageComparer();
+        private ImageComparer Comparer { get; set; } = new ImageComparer();
+        private Thread WorkerThread { get; set; }
 
         public MainWindow()
         {
             InitializeComponent();
+
+            WorkerThread = new Thread(() =>
+            {
+                LookForDuplicates();
+                Dispatcher.BeginInvoke(new Action(PopulateImages));
+                Dispatcher.BeginInvoke(new Action(ResetToDefault));
+            });
+
+            WorkerThread.IsBackground = true;
+        }
+
+        private void ResetToDefault()
+        {
+            PrgBarBlock.Visibility = Visibility.Hidden;
+            DirLabel.Visibility = Visibility.Visible;
+
+            DirLabel.Content = "No folder selected.";
+
+            DirButton.IsEnabled = true;
+            CmpButton.IsEnabled = false;
+
+            CmpButtonLabel.Text = "Start Searching";
+            CmpButtonIcon.Icon = FontAwesome.WPF.FontAwesomeIcon.Search;
         }
 
         private void DirButton_Click(object sender, RoutedEventArgs e)
@@ -52,75 +76,87 @@ namespace GUI
 
         private void CmpButton_Click(object sender, RoutedEventArgs e)
         {
+            // TODO: SAFE MULTITHREADING
+            if (CmpButtonLabel.Text == "Cancel Search")
+            {
+                WorkerThread.Abort();
+                Comparer.Clear();
+                ResetToDefault();
+                return;
+            }
+
+            // Clear previous search
             ImageView.Items.Clear();
-            comparer.Clear();
-            comparer.SetPath((string)DirLabel.Content);
+            Comparer.Clear();
 
-            Progress.Maximum = comparer.Files.Count() * 2;
+            // Set new path
+            Comparer.SetPath((string)DirLabel.Content);
 
-            Thread thread = new Thread(() => 
-            { 
-                
-                LookForDuplicates();
+            // Hide label and in place show progressbar
+            PrgBarBlock.Visibility = Visibility.Visible;
+            DirLabel.Visibility = Visibility.Hidden;
 
-                Dispatcher.BeginInvoke(new Action(delegate
-                {
-                    var item = new TreeViewItem();
+            // Disable folder selection button
+            DirButton.IsEnabled = false;
 
-                    foreach (var orig in comparer.Result)
-                    {
-                        item.Header = orig.Key;
+            // Set Maximum for progressbar as 2 times image count
+            Progress.Maximum = Comparer.Files.Count() * 2;
 
-                        foreach (var copy in orig.Value)
-                        {
-                            var subitem = new TreeViewItem();
+            // Change this button to cancel button
+            CmpButtonLabel.Text = "Cancel Search";
+            CmpButtonIcon.Icon = FontAwesome.WPF.FontAwesomeIcon.Times;
 
-                            subitem.Header = copy;
-
-                            item.Items.Add(subitem);
-                        }
-                    }
-
-                    ImageView.Items.Add(item);
-                }));
-
-            });
-
-            thread.Start();
+            // Look for duplicates in new thread so UI can work indepedently
+            WorkerThread.Start();
         }
 
         private void LookForDuplicates()
         {
-            Action<int> action = (i) => {
+            // Action to change UI progressbar that is owned by other thread
+            Action<int> action = (i) => 
+            {
                 Progress.Value = i;
 
-                if (i <= comparer.Files.Count())
-                {
-                    ProgressLabel.Text = $"Preparing files: { i }/{ comparer.Files.Count() }";
-                }
-                else
-                {
-                    ProgressLabel.Text = $"Comparing files: { i - comparer.Files.Count() }/{ comparer.Files.Count() }";
-                }
+                if (i <= Comparer.Files.Count())  ProgressLabel.Text = $"Preparing files: { i }/{ Comparer.Files.Count() }";
+                else ProgressLabel.Text = $"Comparing files: { i - Comparer.Files.Count() }/{ Comparer.Files.Count() }";
             };
 
-            for (int i = 0; i < comparer.Files.Count(); i++)
+            // First prepare image hashes
+            for (int i = 0; i < Comparer.Files.Count(); i++)
             {
-                comparer.IteratePreparation(i);
-
+                Comparer.IteratePreparation(i);
                 Dispatcher.BeginInvoke(action, i + 1);
             }
 
-            int index = comparer.Files.Count() + 1;
-
-            foreach (var hash in comparer.Hashes)
+            // Comapare image hashes
+            int index = Comparer.Files.Count() + 1;
+            foreach (var hash in Comparer.Hashes)
             {
-                comparer.IterateComparison(hash);
-
+                Comparer.IterateComparison(hash);
                 Dispatcher.BeginInvoke(action, index);
-
                 index++;
             }
+        }
+
+        private void PopulateImages()
+        {
+            var item = new TreeViewItem();
+
+            foreach (var orig in Comparer.Result)
+            {
+                item.Header = orig.Key;
+
+                foreach (var copy in orig.Value)
+                {
+                    var subitem = new TreeViewItem();
+
+                    subitem.Header = copy;
+
+                    item.Items.Add(subitem);
+                }
+            }
+
+            ImageView.Items.Add(item);
         }
     }
 }

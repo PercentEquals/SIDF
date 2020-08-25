@@ -143,6 +143,15 @@ namespace GUI
             WorkerThread.Start();
         }
 
+        private void ImageView_Click(object sender, RoutedEventArgs e)
+        {
+            var item = (sender as ListView).SelectedItem;
+            if (item == null) return;
+
+            BitmapImage image = new BitmapImage(new Uri(((ImgBind)item).Name));
+            ImgPreview.Source = image;
+        }
+
         #endregion
 
         #region Worker Method

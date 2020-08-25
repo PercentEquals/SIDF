@@ -132,7 +132,7 @@ namespace SIDFLibrary
             {
                 if (hash.Key == comp.Key) continue;
 
-                if (hash.Value.Zip(comp.Value, (i, j) => i == j).Count(eq => eq) >= 398)
+                if (hash.Value.Zip(comp.Value, (i, j) => i == j).Count(eq => eq) >= 286)
                 {
                     if (Result.ContainsKey(hash.Key)) Result[hash.Key].Add(comp.Key);
                     else Result.Add(hash.Key, new List<string>() { comp.Key });
@@ -146,6 +146,11 @@ namespace SIDFLibrary
 
         #region Hashing Methods
 
+        /// <summary>
+        /// Returns median brightness of image
+        /// </summary>
+        /// <param name="bitmap">Bitmap of image</param>
+        /// <returns></returns>
         public static float GetMedianBrightness(in Bitmap bitmap)
         {
             List<float> brightness = new List<float>();
@@ -164,15 +169,15 @@ namespace SIDFLibrary
         }
 
         /// <summary>
-        /// Creates hashes of images by scaling them to 20x20 and then reducing those pixels to black and white
+        /// Creates hashes of images by scaling them to 17x17 and then reducing those pixels to black and white
         /// </summary>
         /// <param name="bitmap">Bitmap of image</param>
-        /// <returns>Hash of file in form of 20x20 List of booleans</returns>
+        /// <returns>Hash of file in form of 17x17 List of booleans</returns>
         public static List<bool> GetHash(ref Bitmap bitmap)
         {
             List<bool> result = new List<bool>();
 
-            bitmap = new Bitmap(bitmap, new Size(20, 20));
+            bitmap = new Bitmap(bitmap, new Size(17, 17));
             float brightness = GetMedianBrightness(bitmap);
 
             for (int j = 0; j < bitmap.Height; j++)

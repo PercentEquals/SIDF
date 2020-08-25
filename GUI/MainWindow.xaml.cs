@@ -157,25 +157,18 @@ namespace GUI
             {
                 group++;
 
-                items.Add(new ImgBind() { Name = orig.Key, GroupNumber = $"Group { group }" });
+                items.Add(new ImgBind() { Name = orig.Key, Group = $"Group { group }", Size = orig.Key });
 
                 foreach (var copy in orig.Value)
                 {
-                    items.Add(new ImgBind() { Name = copy, GroupNumber = $"Group { group }" });
+                    items.Add(new ImgBind() { Name = copy, Group = $"Group { group }", Size = copy });
                 }
             }
 
             ImageView.ItemsSource = items;
             CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(ImageView.ItemsSource);
-            PropertyGroupDescription groupDescription = new PropertyGroupDescription("GroupNumber");
+            PropertyGroupDescription groupDescription = new PropertyGroupDescription("Group");
             view.GroupDescriptions.Add(groupDescription);
         }
     }
-
-    class ImgBind
-    {
-        public string Name { get; set; }
-        public string GroupNumber { get; set; }
-    }
-
 }

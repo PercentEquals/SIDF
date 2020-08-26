@@ -197,8 +197,8 @@ namespace GUI
             {
                 Progress.Value++;
 
-                if (Progress.Value <= Comparer.Files.Count())  ProgressLabel.Text = $"Preparing files: { Progress.Value }/{ Comparer.Files.Count() }";
-                else ProgressLabel.Text = $"Comparing files: { Progress.Value - Comparer.Files.Count() }/{ Comparer.Files.Count() }";
+                if (Progress.Value <= Comparer.Files.Count())  ProgressLabel.Text = $"Preparing images: { Progress.Value }/{ Comparer.Files.Count() }";
+                else ProgressLabel.Text = $"Comparing images: { Progress.Value - Comparer.Files.Count() }/{ Comparer.Files.Count() }";
             };
 
             // Generate image hashes
